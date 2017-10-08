@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**Usage
- * spark-submit --master local[15] --class fi.aalto.ngs.metagenomics.Interleave target/metagenomics-0.9-jar-with-dependencies.jar -fastq /user/root/reads/reads/forward.fastq -fastq2 /user/root/reads/reads/reverse.fastq -splitsize 100000 -splitout /user/root/interleaved2 -interleave
+ * spark-submit --master local[15] --class org.ngseq.metagenomics.Interleave target/metagenomics-0.9-jar-with-dependencies.jar -fastq /user/root/reads/reads/forward.fastq -fastq2 /user/root/reads/reads/reverse.fastq -splitsize 100000 -splitout /user/root/interleaved2 -interleave
  **/
 
 

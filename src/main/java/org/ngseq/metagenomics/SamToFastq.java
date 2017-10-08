@@ -17,7 +17,7 @@ import scala.Tuple2;
 import java.io.IOException;
 
 /**Usage
- *  spark-submit --master local[4] --class fi.aalto.ngs.metagenomics.Interleave target/metagenomics-0.9-jar-with-dependencies.jar -fastq /user/root/fw.fq -fastq2 /user/root/rw.fq -splitsize 10000 -splitout /user/root/fqsplits -interleave
+ *  spark-submit --master local[4] --class org.ngseq.metagenomics.Interleave target/metagenomics-0.9-jar-with-dependencies.jar -fastq /user/root/fw.fq -fastq2 /user/root/rw.fq -splitsize 10000 -splitout /user/root/fqsplits -interleave
    **/
 
 

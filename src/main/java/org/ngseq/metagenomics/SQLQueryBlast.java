@@ -12,7 +12,7 @@ import java.io.IOException;
 
 /**
  * Usage
- spark-submit  --master local[40] --driver-memory 4g --executor-memory 4g --class fi.aalto.ngs.metagenomics.SQLQueryBlast target/metagenomics-0.9-jar-with-dependencies.jar -in normrdd.fq -out blast_result -query "SELECT * from records ORDER BY sseqid ASC"
+ spark-submit  --master local[40] --driver-memory 4g --executor-memory 4g --class org.ngseq.metagenomics.SQLQueryBlast target/metagenomics-0.9-jar-with-dependencies.jar -in normrdd.fq -out blast_result -query "SELECT * from records ORDER BY sseqid ASC"
 
  **/
 

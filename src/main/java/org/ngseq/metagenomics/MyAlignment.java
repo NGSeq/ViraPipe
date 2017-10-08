@@ -3,7 +3,7 @@ package org.ngseq.metagenomics;
 import java.io.Serializable;
 
 /**
- * Created by root on 11/3/16.
+ * Created by ilamaa on 11/3/16.
  */
 
 

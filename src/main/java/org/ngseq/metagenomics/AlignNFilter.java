@@ -24,9 +24,9 @@ import java.util.List;
 /**Usage
  *  Usage example:
  //ON SINGLE NODE
- spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 30g --class fi.aalto.ngs.metagenomics.AlignNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -out ${OUTPUT_PATH}/${PROJECT_NAME}_aligned -ref ${REF_INDEX_IN_LOCAL_FS} -unmapped -avgq 50 -lowqc 50 -lowqt 64
+ spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 30g --class org.ngseq.metagenomics.AlignNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -out ${OUTPUT_PATH}/${PROJECT_NAME}_aligned -ref ${REF_INDEX_IN_LOCAL_FS} -unmapped -avgq 50 -lowqc 50 -lowqt 64
  //ON YARN CLUSTER
- spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 30g --conf spark.yarn.executor.memoryOverhead=10000  --class fi.aalto.ngs.metagenomics.AlignNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -out ${OUTPUT_PATH}/${PROJECT_NAME}_aligned -ref ${REF_INDEX_IN_LOCAL_FS} -unmapped -avgq 50 -lowqc 50 -lowqt 64
+ spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 30g --conf spark.yarn.executor.memoryOverhead=10000  --class org.ngseq.metagenomics.AlignNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -out ${OUTPUT_PATH}/${PROJECT_NAME}_aligned -ref ${REF_INDEX_IN_LOCAL_FS} -unmapped -avgq 50 -lowqc 50 -lowqt 64
 
  **/
 

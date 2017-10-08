@@ -1,19 +1,4 @@
-package org.ngseq.metagenomics;/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package org.ngseq.metagenomics;
 
 import org.apache.commons.cli.*;
 import org.apache.hadoop.conf.Configuration;
@@ -32,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**Usage
- spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 20g --class fi.aalto.ngs.metagenomics.Assemble metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_groupped -out ${OUTPUT_PATH}/${PROJECT_NAME}_assembled -localdir ${LOCAL_TEMP_PATH} -merge -t ${ASSEMBLER_THREADS}
+ spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 20g --class org.ngseq.metagenomics.Assemble metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_groupped -out ${OUTPUT_PATH}/${PROJECT_NAME}_assembled -localdir ${LOCAL_TEMP_PATH} -merge -t ${ASSEMBLER_THREADS}
 
- spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 20g --conf spark.yarn.executor.memoryOverhead=10000  --class fi.aalto.ngs.metagenomics.Assemble metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_groupped -out ${OUTPUT_PATH}/${PROJECT_NAME}_assembled -localdir ${LOCAL_TEMP_PATH} -merge -t ${ASSEMBLER_THREADS}
+ spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 20g --conf spark.yarn.executor.memoryOverhead=10000  --class org.ngseq.metagenomics.Assemble metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_groupped -out ${OUTPUT_PATH}/${PROJECT_NAME}_assembled -localdir ${LOCAL_TEMP_PATH} -merge -t ${ASSEMBLER_THREADS}
 
  **/
 
@@ -81,7 +66,7 @@ public class Assemble {
     boolean debug = cmd.hasOption("debug");
 
     int t = (cmd.hasOption("t")==true)? Integer.valueOf(cmd.getOptionValue("t")):1;
-    double m = (cmd.hasOption("m")==true)? Double.valueOf(cmd.getOptionValue("m")):0.1;
+    double m = (cmd.hasOption("m")==true)? Double.valueOf(cmd.getOptionValue("m")):0.9;
     boolean mergeout = cmd.hasOption("merge");
 
     FileSystem fs = FileSystem.get(new Configuration());
@@ -117,7 +102,7 @@ public class Assemble {
         String fname = path.substring(path.lastIndexOf("/"), path.lastIndexOf("."));
         String tempName = String.valueOf((new Date()).getTime());
 
-      String ass_cmd = "hdfs dfs -text " + path + " | megahit -t" + t + " -m" + m + " -r /dev/stdin -o "+localdir+"/"+tempName;
+      String ass_cmd = "hdfs dfs -text " + path + " | megahit -t" + t + " -m" + m + " --12 /dev/stdin -o "+localdir+"/"+tempName;
       System.out.println(ass_cmd);
 
       ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", ass_cmd);

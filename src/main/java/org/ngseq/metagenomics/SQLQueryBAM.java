@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Usage
- spark-submit --master local[40] --driver-memory 4g --executor-memory 4g --class fi.aalto.ngs.metagenomics.SQLQueryBAM target/metagenomics-0.9-jar-with-dependencies.jar -in aligned -out unmapped -query "SELECT * from records WHERE readUnmapped = TRUE"
+ spark-submit --master local[40] --driver-memory 4g --executor-memory 4g --class org.ngseq.metagenomics.SQLQueryBAM target/metagenomics-0.9-jar-with-dependencies.jar -in aligned -out unmapped -query "SELECT * from records WHERE readUnmapped = TRUE"
 
  **/
 

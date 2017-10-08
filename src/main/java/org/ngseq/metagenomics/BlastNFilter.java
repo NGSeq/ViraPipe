@@ -24,9 +24,9 @@ import java.util.Arrays;
 /**
  Usage:
 
- spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 10g --class fi.aalto.ngs.metagenomics.BlastNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_contigs -out ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -db ${BLAST_HUMAN_DATABASE} -task megablast -outfmt 6 -threshold 70 -num_threads ${BLAST_THREADS}
+ spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 10g --class org.ngseq.metagenomics.BlastNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_contigs -out ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -db ${BLAST_HUMAN_DATABASE} -task megablast -outfmt 6 -threshold 70 -num_threads ${BLAST_THREADS}
 
- spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 10g --conf spark.yarn.executor.memoryOverhead=10000  --class fi.aalto.ngs.metagenomics.BlastNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_contigs -out ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -db ${BLAST_HUMAN_DATABASE} -task megablast -outfmt 6 -threshold 70 -num_threads ${BLAST_THREADS}
+ spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 10g --conf spark.yarn.executor.memoryOverhead=10000  --class org.ngseq.metagenomics.BlastNFilter metagenomics-0.9-jar-with-dependencies.jar -in ${OUTPUT_PATH}/${PROJECT_NAME}_contigs -out ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -db ${BLAST_HUMAN_DATABASE} -task megablast -outfmt 6 -threshold 70 -num_threads ${BLAST_THREADS}
  */
 public class BlastNFilter {
 
@@ -74,7 +74,7 @@ public class BlastNFilter {
         int max_target_seqs = (cmd.hasOption("max_target_seqs")==true)? Integer.valueOf(cmd.getOptionValue("max_target_seqs")):10;
         double evalue = (cmd.hasOption("evalue")==true)? Double.valueOf(cmd.getOptionValue("evalue")):0.001;
         boolean show_gis = cmd.hasOption("show_gis");
-        int outfmt = (cmd.hasOption("outfmt")==true)? Integer.valueOf(cmd.getOptionValue("outfmt")):6;
+        String outfmt = (cmd.hasOption("outfmt")==true)? cmd.getOptionValue("outfmt"):"6";
         int num_threads = (cmd.hasOption("num_threads")==true)? Integer.valueOf(cmd.getOptionValue("num_threads")):1;
 
         String db = (cmd.hasOption("db")==true)? cmd.getOptionValue("db"):"/mnt/hdfs/1/index_hg/hg"; //We want to filter out human matches, so use human db as default

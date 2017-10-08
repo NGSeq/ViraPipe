@@ -19,7 +19,7 @@ import java.io.IOException;
 
 /**
  * Usage
- spark-submit  --master local[40] --driver-memory 4g --executor-memory 4g --class fi.aalto.ngs.metagenomics.SQLQueryFastq target/metagenomics-0.9-jar-with-dependencies.jar -in normrdd.fq -out results -query "SELECT * from records ORDER BY key ASC"
+ spark-submit  --master local[40] --driver-memory 4g --executor-memory 4g --class org.ngseq.metagenomics.SQLQueryFastq target/metagenomics-0.9-jar-with-dependencies.jar -in normrdd.fq -out results -query "SELECT * from records ORDER BY key ASC"
 
  **/
 

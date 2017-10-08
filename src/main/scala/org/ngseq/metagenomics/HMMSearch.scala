@@ -65,7 +65,7 @@ object HMMSearch {
         val rm_tmp_dir = "if [ -d "+tempDir+" ]; then rm -r "+tempDir+"; fi"
         val mk_tmp_dir = "if [ ! -d "+tempDir+" ]; then mkdir "+tempDir+"; fi"
         val cp_2_loc = "hdfs dfs -get " + inputDir + "/" + fname +  " "+tempDir+"/" + fname
-        val hmm = "hmmsearch --noali --cpu 10 -o "+tempDir+"/lsu."+fname+".txt --tblout "+tempDir+"/lsu."+fname+".table.txt db" + " "+tempDir+"/" + fname + " 2> "+tempDir+"/error.log"
+        val hmm = "hmmsearch --noali --cpu 10 -o "+tempDir+"/lsu."+fname+".txt --tblout "+tempDir+"/lsu."+fname+".table.txt " +db+ " "+tempDir+"/" + fname + " 2> "+tempDir+"/error.log"
         val cp_2_dfs = "hdfs dfs -put "+tempDir+"/lsu."+fname+".table.txt" + " " + outputDir+"/"+fname+".table.txt";
         //run commands
         val rm_status = Seq("/bin/sh", "-c", rm_tmp_dir).!
@@ -79,7 +79,7 @@ object HMMSearch {
 
     val clean_hmmRDD = fastaFilesRDD.map(fname => {
 
-      val rm_tmp_dir = "if [ -d /mnt/hdfs/1/hmm_tmp_dir ]; then rm -r /mnt/hdfs/1/hmm_tmp_dir; fi"
+      val rm_tmp_dir = "if [ -d "+tempDir+" ]; then rm -r "+tempDir+"; fi"
       val clean_up_status = Seq("/bin/sh", "-c", rm_tmp_dir).!
 
     }).collect()

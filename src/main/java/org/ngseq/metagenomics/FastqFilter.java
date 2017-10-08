@@ -18,9 +18,9 @@ import java.util.ArrayList;
 
 /**Usage
  * Apply different quality filters to FASTQ reads
- spark-submit --master local[20] --class fi.aalto.ngs.metagenomics.FastqFilter target/metagenomics-0.9-jar-with-dependencies.jar -fastq /user/root/fqsplits -avgc 0.5 -lowqc 10 -lowqt 50
+ spark-submit --master local[20] --class org.ngseq.metagenomics.FastqFilter target/metagenomics-0.9-jar-with-dependencies.jar -fastq /user/root/fqsplits -avgc 0.5 -lowqc 10 -lowqt 50
 
- spark-submit --master yarn --deploy-mode client --conf spark.dynamicAllocation.enabled=true --executor-memory 10g  --conf spark.yarn.executor.memoryOverhead=3000 --conf spark.task.maxFailures=40 --conf spark.yarn.max.executor.failures=100 --conf spark.hadoop.validateOutputSpecs=true --class fi.aalto.ngs.metagenomics.FastqFilter target/metagenomics-0.9-jar-with-dependencies.jar -fastq interleaved -ref /index/hg38.fa -bwaout bam -align -unmapped
+ spark-submit --master yarn --deploy-mode client --conf spark.dynamicAllocation.enabled=true --executor-memory 10g  --conf spark.yarn.executor.memoryOverhead=3000 --conf spark.task.maxFailures=40 --conf spark.yarn.max.executor.failures=100 --conf spark.hadoop.validateOutputSpecs=true --class org.ngseq.metagenomics.FastqFilter target/metagenomics-0.9-jar-with-dependencies.jar -fastq interleaved -ref /index/hg38.fa -bwaout bam -align -unmapped
 
  **/
 

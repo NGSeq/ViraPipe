@@ -33,9 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**Usage
- spark-submit  --master local[${NUM_EXECUTORS}] --executor-memory 10g --class fi.aalto.ngs.metagenomics.DecompressInterleave metagenomics-0.9-jar-with-dependencies.jar -in ${INPUT_PATH} -temp ${TEMP_PATH} -out ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -remtemp
+ spark-submit  --master local[${NUM_EXECUTORS}] --executor-memory 10g --class org.ngseq.metagenomics.DecompressInterleave metagenomics-0.9-jar-with-dependencies.jar -in ${INPUT_PATH} -temp ${TEMP_PATH} -out ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -remtemp
  *
- spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 10g --conf spark.yarn.executor.memoryOverhead=5000   --class fi.aalto.ngs.metagenomics.DecompressInterleave metagenomics-0.9-jar-with-dependencies.jar -in ${INPUT_PATH} -temp ${TEMP_PATH} -out ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -remtemp
+ spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 10g --conf spark.yarn.executor.memoryOverhead=5000   --class org.ngseq.metagenomics.DecompressInterleave metagenomics-0.9-jar-with-dependencies.jar -in ${INPUT_PATH} -temp ${TEMP_PATH} -out ${OUTPUT_PATH}/${PROJECT_NAME}_interleaved -remtemp
  **/
 
 
