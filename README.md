@@ -59,9 +59,9 @@ Installation
     Extract and make
 
 ### Download and extract BLAST and HMMER databases under the same path on every worker node
-    ## vFam database for hmmsearch
+#### vFam database for hmmsearch
     wget http://derisilab.ucsf.edu/software/vFam/vFam-B_2014.hmm
-    ## BLAST database files
+#### BLAST database files
     for i in {0..9}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.0$i.tar.gz ; done
     for i in {10..50}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.$i.tar.gz ; done
     for i in {0..9}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/human_genomic.0$i.tar.gz ; done
