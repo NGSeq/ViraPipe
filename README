@@ -26,10 +26,11 @@ Scala parsing library Scallop 2.1.2 +
 ------------------------------------------------------------------------------------------
 Installation
 ------------------------------------------------------------------------------------------
+### Compiling ViraPipe
 
-git clone https://github.com/ViraSeq
-cd ViraSeq
-mvn install package
+    git clone https://github.com/NGSeq/ViraPipe
+    cd ViraPipe
+    mvn install package
 
 ### jbwa
     git clone https://github.com/lindenb/jbwa
