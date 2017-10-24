@@ -50,18 +50,18 @@ Installation
 
 ### Download and install BLAST and HMMER software on every worker node (requires gcc compiler)
 
-    [HMMER](http://www.hmmer.org/download.html)
+[HMMER](http://www.hmmer.org/download.html)
     wget http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x86_64.tar.gz
     Extract and make
 
-    [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+[BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
     wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.6.0+-x64-linux.tar.gz
     Extract and make
 
 ### Download and extract BLAST and HMMER databases under the same path on every worker node
-#### vFam database for hmmsearch
+##### vFam database for hmmsearch
     wget http://derisilab.ucsf.edu/software/vFam/vFam-B_2014.hmm
-#### BLAST database files
+##### BLAST database files
     for i in {0..9}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.0$i.tar.gz ; done
     for i in {10..50}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.$i.tar.gz ; done
     for i in {0..9}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/human_genomic.0$i.tar.gz ; done
@@ -69,13 +69,13 @@ Installation
     wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
     cat *.gz | tar -xzvf - -i
     
-    ## Copy DBs to every node with scp
+##### Copy DBs to every node with scp
     scp vFam-B_2014.hmm username@hostname:/database/hmmer
     scp nt.* username@hostname:/database/blast/nt
     scp human_genomic.* username@hostname:/database/blast/hg
     scp taxdb.* username@hostname:/database/taxdb
 
-    ## Set BLASTDB environment variable on each node:
+##### Set BLASTDB environment variable on each node:
     export BLASTDB=$BLASTDB:/database/blast/nt
     export BLASTDB=$BLASTDB:/database/blast/hg
     export BLASTDB=$BLASTDB:/database/taxdb
