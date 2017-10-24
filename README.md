@@ -50,31 +50,32 @@ Installation
 
 ### Download and install BLAST and HMMER software on every worker node (requires gcc compiler)
 
-[HMMER](http://www.hmmer.org/download.html)
+    [HMMER](http://www.hmmer.org/download.html)
     wget http://eddylab.org/software/hmmer3/3.1b2/hmmer-3.1b2-linux-intel-x86_64.tar.gz
     Extract and make
 
-[BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+    [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
     wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.6.0+-x64-linux.tar.gz
     Extract and make
 
 ### Download and extract BLAST and HMMER databases under the same path on every worker node
-eg. vFam database for hmmsearch
+    ## vFam database for hmmsearch
     wget http://derisilab.ucsf.edu/software/vFam/vFam-B_2014.hmm
-eg. BLAST nt and human database files
+    ## BLAST database files
     for i in {0..9}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.0$i.tar.gz ; done
     for i in {10..50}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.$i.tar.gz ; done
     for i in {0..9}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/human_genomic.0$i.tar.gz ; done
     for i in {10..22}; do wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/human_genomic.$i.tar.gz ; done
     wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
     cat *.gz | tar -xzvf - -i
-Copy DBs to every node with scp
+    
+    ## Copy DBs to every node with scp
     scp vFam-B_2014.hmm username@hostname:/database/hmmer
     scp nt.* username@hostname:/database/blast/nt
     scp human_genomic.* username@hostname:/database/blast/hg
     scp taxdb.* username@hostname:/database/taxdb
 
-Set BLASTDB environment variable on each node:
+    ## Set BLASTDB environment variable on each node:
     export BLASTDB=$BLASTDB:/database/blast/nt
     export BLASTDB=$BLASTDB:/database/blast/hg
     export BLASTDB=$BLASTDB:/database/taxdb
@@ -82,10 +83,10 @@ Set BLASTDB environment variable on each node:
 Running the example pipeline
 ------------------------------------------------------------------------------------------
 
-###Download human reference genome index on every node under the same path e.g. /index
+### Download human reference genome index on every node under the same path e.g. /index
     wget -r ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/*
 
-###Download NGS sequence files and load to HDFS
+### Download NGS sequence files and load to HDFS
     wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00313/sequence_read/ERR016234_1.filt.fastq.gz
     wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00313/sequence_read/ERR016234_2.filt.fastq.gz
     hdfs dfs -mkdir /data/input/example
@@ -93,6 +94,6 @@ Running the example pipeline
     hdfs dfs -put ERR016234_1.filt.fastq.gz /data/input/example
     hdfs dfs -put ERR016234_2.filt.fastq.gz /data/input/example
 
-###Run the pipeline
-Check that configuration of Spark master, num-executors, executor-memory etc. fit your system and that classpath, directories, databases etc. exists and user has proper permissions.
+### Run the pipeline
+    Check that configuration of Spark master, num-executors, executor-memory etc. fit your system and that classpath, directories, databases etc. exists and user has proper permissions.
     scripts/virapipe.sh /data/input /data/output example
