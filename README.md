@@ -102,5 +102,5 @@ Running the example pipeline
 ------------------------------------------------------------------------------------------
 Citation
 ------------------------------------------------------------------------------------------
-AI Maarala, Z Bzhalava, J Dillner, K Heljanko, D Bzhalava
+AI Maarala, Z Bzhalava, J Dillner, K Heljanko, D Bzhalava;
 ViraPipe: Scalable Parallel Pipeline for Viral Metagenome Analysis from Next Generation Sequencing Reads, Bioinformatics, Nov. 2017, btx702, https://doi.org/10.1093/bioinformatics/btx702
