@@ -97,3 +97,10 @@ Running the example pipeline
 ### Run the pipeline
     Check that configuration of Spark master, num-executors, executor-memory etc. fit your system and that classpath, directories, databases etc. exists and user has proper permissions.
     scripts/virapipe.sh /data/input /data/output example
+    
+    
+------------------------------------------------------------------------------------------
+Citation
+------------------------------------------------------------------------------------------
+AI Maarala, Z Bzhalava, J Dillner, K Heljanko, D Bzhalava
+ViraPipe: Scalable Parallel Pipeline for Viral Metagenome Analysis from Next Generation Sequencing Reads, Bioinformatics, Nov. 2017, btx702, https://doi.org/10.1093/bioinformatics/btx702
