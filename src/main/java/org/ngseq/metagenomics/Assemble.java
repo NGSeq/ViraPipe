@@ -1,6 +1,7 @@
 package org.ngseq.metagenomics;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -8,11 +9,14 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSClient;
 import org.apache.hadoop.hdfs.DFSInputStream;
+import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.broadcast.Broadcast;
 
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -41,6 +45,8 @@ public class Assemble {
     options.addOption(new Option( "merge", "Merge output"));
     options.addOption(  new Option( "subdirs", "Read from subdirectories" ) );
     options.addOption(  new Option( "debug", "saves error log" ) );
+    options.addOption(  new Option( "bin", true,"Path to megahit binary, defaults calls 'megahit'" ) );
+    options.addOption(  new Option( "single", "Single reads option, default is interleaved paired-end" ) );
 
     options.addOption( splitOpt );
     options.addOption( cOpt );
@@ -64,6 +70,8 @@ public class Assemble {
     String localdir = cmd.getOptionValue("localdir");
     boolean subdirs = cmd.hasOption("subdirs");
     boolean debug = cmd.hasOption("debug");
+    String readstype = (cmd.hasOption("single")==true)? "-r":"--12";
+    String bin = (cmd.hasOption("bin")==true)? cmd.getOptionValue("bin"):"megahit";
 
     int t = (cmd.hasOption("t")==true)? Integer.valueOf(cmd.getOptionValue("t")):1;
     double m = (cmd.hasOption("m")==true)? Double.valueOf(cmd.getOptionValue("m")):0.9;
@@ -81,8 +89,8 @@ public class Assemble {
         for (int i=0;i<st.length;i++){
           String fn = st[i].getPath().getName().toString();
           if(!fn.equalsIgnoreCase("_SUCCESS")){
-            splitFileList.add(st[i].getPath().toString());
-            System.out.println(st[i].getPath().toString());
+            splitFileList.add(st[i].getPath().toUri().getRawPath().toString());
+            System.out.println(st[i].getPath().toUri().getRawPath().toString());
           }
         }
       }
@@ -91,20 +99,26 @@ public class Assemble {
       for (int i=0;i<st.length;i++){
         String fn = st[i].getPath().getName().toString();
         if(!fn.equalsIgnoreCase("_SUCCESS"))
-          splitFileList.add(st[i].getPath().toString());
+          splitFileList.add(st[i].getPath().toUri().getRawPath().toString());
       }
     }
 
     JavaRDD<String> splitFilesRDD = sc.parallelize(splitFileList, splitFileList.size());
-
+    Broadcast<String> bs = sc.broadcast(fs.getUri().toString());
     JavaRDD<String> outRDD = splitFilesRDD.mapPartitions(f -> {
       String path = f.next();
-      String fname = path.substring(path.lastIndexOf("/"), path.lastIndexOf("."));
+      System.out.println(path);
+      String fname;
+      if(path.lastIndexOf(".")<path.lastIndexOf("/"))
+        fname = path.substring(path.lastIndexOf("/")+1);
+      else fname = path.substring(path.lastIndexOf("/")+1, path.lastIndexOf("."));
+
       String tempName = String.valueOf((new Date()).getTime());
 
-      DFSClient client = new DFSClient(fs.getUri(), new Configuration());
+      DFSClient client = new DFSClient(URI.create(bs.getValue()), new Configuration());
       DFSInputStream hdfsstream = client.open(path);
-      String ass_cmd = "megahit -t" + t + " -m" + m + " --12 /dev/stdin -o "+localdir+"/"+tempName;
+
+      String ass_cmd = bin+" -t" + t + " -m" + m + " "+readstype+" /dev/stdin -o "+localdir+"/"+tempName;
       System.out.println(ass_cmd);
 
       ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", ass_cmd);
@@ -115,17 +129,22 @@ public class Assemble {
       String line;
       while ((line = hdfsinput.readLine()) != null) {
         writer.write(line);
+        writer.newLine();
       }
-      writer.flush();
+      writer.close();
+
+      ArrayList<String> out = new ArrayList<String>();
+      BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      String il;
+      while ((il = in.readLine()) != null) il.length();
 
       BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
       String e;
-      ArrayList<String> out = new ArrayList<String>();
       while ((e = err.readLine()) != null) {
         System.out.println(e);
         out.add(e);
       }
-      process.waitFor();
+
     //TODO:Pipe commands to copy from loca to HDFS and remove local temp
 
       String copy_cmd = System.getenv("HADOOP_HOME")+"/bin/hdfs dfs -put "+localdir+"/"+tempName+" "+ outDir+"/"+fname;

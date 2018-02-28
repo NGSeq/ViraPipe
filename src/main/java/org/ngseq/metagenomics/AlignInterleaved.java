@@ -36,7 +36,7 @@ public class AlignInterleaved {
 
     Options options = new Options();
     Option pathOpt = new Option( "in", true, "Path to fastq file in hdfs." );    //gmOpt.setRequired(true);
-    Option refOpt = new Option( "ref", true, "Path to fasta reference file in local FS." );
+    Option refOpt = new Option( "ref", true, "Path to fasta reference in local FS. (index must be available on every node under the same path)" );
     Option fqoutOpt = new Option( "out", true, "" );
     options.addOption( pathOpt );
     options.addOption( refOpt );

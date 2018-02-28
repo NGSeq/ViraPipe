@@ -5,19 +5,21 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DFSClient;
+import org.apache.hadoop.hdfs.DFSInputStream;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.Optional;
+import org.apache.spark.broadcast.Broadcast;
 import org.seqdoop.hadoop_bam.FastaInputFormat;
 import org.seqdoop.hadoop_bam.FastqInputFormat;
 import scala.Tuple2;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -50,6 +52,7 @@ public class BlastNFilter {
         options.addOption(new Option( "task", true, "" ));
         options.addOption(new Option( "threshold", true, "" ));
         options.addOption(new Option( "fa", true, "Include only files with extension given " ));
+        options.addOption(  new Option( "bin", true,"Path to blastn binary, defaults calls 'blastn'" ) );
 
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp( "spark-submit <spark specific args>", options, true );
@@ -76,8 +79,9 @@ public class BlastNFilter {
         boolean show_gis = cmd.hasOption("show_gis");
         String outfmt = (cmd.hasOption("outfmt")==true)? cmd.getOptionValue("outfmt"):"6";
         int num_threads = (cmd.hasOption("num_threads")==true)? Integer.valueOf(cmd.getOptionValue("num_threads")):1;
+        String bin = (cmd.hasOption("bin")==true)? cmd.getOptionValue("bin"):"blastn";
 
-        String db = (cmd.hasOption("db")==true)? cmd.getOptionValue("db"):"/mnt/hdfs/1/index_hg/hg"; //We want to filter out human matches, so use human db as default
+        String db = (cmd.hasOption("db")==true)? cmd.getOptionValue("db"):"Path to local Blast human genome database (database must be available on every node under the same path)"; //We want to filter out human matches, so use human db as default
         String task = (cmd.hasOption("task")==true)? cmd.getOptionValue("task"):"blastn";
         int threshold = (cmd.hasOption("threshold")==true)? Integer.valueOf(cmd.getOptionValue("threshold")):0;
         String fastaonly = (cmd.hasOption("fa")==true)? cmd.getOptionValue("fa"):null;
@@ -93,39 +97,50 @@ public class BlastNFilter {
             if(!st[i].isDirectory() && st[i].getLen()>1){
                     if(fastaonly!=null){
                         if(st[i].getPath().getName().endsWith(fastaonly)){
-                            splitFileList.add(st[i].getPath().toString());
-                            System.out.println(st[i].getPath().toString());
+                            splitFileList.add(st[i].getPath().toUri().getRawPath().toString());
+                            System.out.println(st[i].getPath().toUri().getRawPath().toString());
                         }
                     }else{
-                        splitFileList.add(st[i].getPath().toString());
-                        System.out.println(st[i].getPath().toString());
+                        splitFileList.add(st[i].getPath().toUri().getRawPath().toString());
+                        System.out.println(st[i].getPath().toUri().getRawPath().toString());
                     }
             }
         }
 
         JavaRDD<String> fastaFilesRDD = sc.parallelize(splitFileList, splitFileList.size());
+        Broadcast<String> bcast = sc.broadcast(fs.getUri().toString());
         JavaPairRDD<String, String> outRDD = fastaFilesRDD.mapPartitionsToPair(f -> {
             Process process;
             String fname = f.next();
 
-            System.out.println("fname: " + fname);
+            DFSClient client = new DFSClient(URI.create(bcast.getValue()), new Configuration());
+            DFSInputStream hdfsstream = client.open(fname);
             String blastn_cmd;
             if (task.equalsIgnoreCase("megablast"))
-                blastn_cmd = "hdfs dfs -text " + fname + " | blastn -db " + db + " -num_threads "+num_threads+" -task megablast -word_size " + word_size + " -max_target_seqs " + max_target_seqs + " -evalue " + evalue + " " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt " + outfmt;
+                blastn_cmd = bin+" -db " + db + " -num_threads "+num_threads+" -task megablast -word_size " + word_size + " -max_target_seqs " + max_target_seqs + " -evalue " + evalue + " " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt " + outfmt;
             else
-                blastn_cmd = "hdfs dfs -text " + fname + " | blastn -db " + db + " -num_threads "+num_threads+" -word_size " + word_size + " -gapopen " + gapopen + " -gapextend " + gapextend + " -penalty " + penalty + " -reward " + reward + " -max_target_seqs " + max_target_seqs + " -evalue " + evalue + " " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt " + outfmt;
+                blastn_cmd = bin+" -db " + db + " -num_threads "+num_threads+" -word_size " + word_size + " -gapopen " + gapopen + " -gapextend " + gapextend + " -penalty " + penalty + " -reward " + reward + " -max_target_seqs " + max_target_seqs + " -evalue " + evalue + " " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt " + outfmt;
 
             System.out.println(blastn_cmd);
 
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", blastn_cmd);
             process = pb.start();
 
+            BufferedReader hdfsinput = new BufferedReader(new InputStreamReader(hdfsstream));
+            BufferedWriter blastinputwriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            String l;
+            while ((l = hdfsinput.readLine()) != null) {
+                blastinputwriter.write(l);
+                blastinputwriter.newLine();
+            }
+            blastinputwriter.close();
+
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
+            String bline;
             ArrayList<Tuple2<String, String>> out = new ArrayList<>();
-            while ((line = in.readLine()) != null) {
-                String[] l = line.trim().split("\t");
-                out.add(new Tuple2(l[0], line));
+            while ((bline = in.readLine()) != null) {
+                String[] s = bline.trim().split("\t");
+                out.add(new Tuple2(s[0], bline));
             }
 
             /*
@@ -135,8 +150,6 @@ public class BlastNFilter {
                 out.add(e);
             }
             */
-
-            process.waitFor();
             in.close();
             return out.iterator();
         });
