@@ -6,13 +6,13 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DFSClient;
+import org.apache.hadoop.hdfs.DFSInputStream;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -98,15 +98,25 @@ public class Assemble {
     JavaRDD<String> splitFilesRDD = sc.parallelize(splitFileList, splitFileList.size());
 
     JavaRDD<String> outRDD = splitFilesRDD.mapPartitions(f -> {
-        String path = f.next();
-        String fname = path.substring(path.lastIndexOf("/"), path.lastIndexOf("."));
-        String tempName = String.valueOf((new Date()).getTime());
+      String path = f.next();
+      String fname = path.substring(path.lastIndexOf("/"), path.lastIndexOf("."));
+      String tempName = String.valueOf((new Date()).getTime());
 
-      String ass_cmd = "hdfs dfs -text " + path + " | megahit -t" + t + " -m" + m + " --12 /dev/stdin -o "+localdir+"/"+tempName;
+      DFSClient client = new DFSClient(fs.getUri(), new Configuration());
+      DFSInputStream hdfsstream = client.open(path);
+      String ass_cmd = "megahit -t" + t + " -m" + m + " --12 /dev/stdin -o "+localdir+"/"+tempName;
       System.out.println(ass_cmd);
 
       ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", ass_cmd);
       Process process = pb.start();
+
+      BufferedReader hdfsinput = new BufferedReader(new InputStreamReader(hdfsstream));
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+      String line;
+      while ((line = hdfsinput.readLine()) != null) {
+        writer.write(line);
+      }
+      writer.flush();
 
       BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
       String e;
@@ -118,7 +128,7 @@ public class Assemble {
       process.waitFor();
     //TODO:Pipe commands to copy from loca to HDFS and remove local temp
 
-      String copy_cmd = "hdfs dfs -put "+localdir+"/"+tempName+" "+ outDir+"/"+fname;
+      String copy_cmd = System.getenv("HADOOP_HOME")+"/bin/hdfs dfs -put "+localdir+"/"+tempName+" "+ outDir+"/"+fname;
 
       ProcessBuilder pb2 = new ProcessBuilder("/bin/sh", "-c", copy_cmd, "chmod -R 777 "+ outDir);
       Process process2 = pb2.start();

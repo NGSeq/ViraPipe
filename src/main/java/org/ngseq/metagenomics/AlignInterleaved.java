@@ -76,9 +76,7 @@ public class AlignInterleaved {
       while (split.hasNext()) {
         Tuple2<Text, SequencedFragment> next = split.next();
         String key = next._1.toString();
-        String[] keysplit = key.split(" ");
-        key = keysplit[0];
-
+        key=key.contains("/")?key.substring(0,key.indexOf("/")):key.substring(0,key.indexOf(" "));
         SequencedFragment sf = new SequencedFragment();
         sf.setQuality(new Text(next._2.getQuality().toString()));
         sf.setSequence(new Text(next._2.getSequence().toString()));
@@ -87,8 +85,7 @@ public class AlignInterleaved {
 
           Tuple2<Text, SequencedFragment> next2 = split.next();
           String key2 = next2._1.toString();
-          String[] keysplit2 = key2.split(" ");
-          key2 = keysplit2[0];
+          key2=key2.contains("/")?key2.substring(0,key2.indexOf("/")):key2.substring(0,key2.indexOf(" "));
 
           SequencedFragment sf2 = new SequencedFragment();
           sf2.setQuality(new Text(next2._2.getQuality().toString()));

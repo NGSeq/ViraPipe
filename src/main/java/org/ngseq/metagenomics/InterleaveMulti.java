@@ -141,7 +141,6 @@ public class InterleaveMulti {
     FSDataOutputStream dataOutput = null;
     try {
       FileSystem fs = FileSystem.get(config);
-      dataOutput = new FSDataOutputStream(os);
       dataOutput = fs.create(new Path(fileName));
     } catch (IOException e) {
       e.printStackTrace();

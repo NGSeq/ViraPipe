@@ -5,6 +5,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DFSClient;
+import org.apache.hadoop.hdfs.DFSInputStream;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -14,9 +16,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -98,35 +98,36 @@ public class BlastN {
         JavaRDD<String> outRDD = fastaFilesRDD.mapPartitions(f -> {
             Process process;
             String fname = f.next();
-            System.out.println("fname: " + fname);
+            DFSClient client = new DFSClient(fs.getUri(), new Configuration());
+            DFSInputStream hdfsstream = client.open(fname);
             String blastn_cmd;
             if(task.equalsIgnoreCase("megablast"))
-                blastn_cmd = "hdfs dfs -text "+fname+" | blastn -db "+db+" -num_threads "+num_threads+" -task megablast -word_size "+word_size+" -max_target_seqs "+max_target_seqs+" -evalue "+evalue+" " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt "+outfmt;
+                blastn_cmd = "blastn -db "+db+" -num_threads "+num_threads+" -task megablast -word_size "+word_size+" -max_target_seqs "+max_target_seqs+" -evalue "+evalue+" " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt "+outfmt;
             else
-                blastn_cmd = "hdfs dfs -text "+fname+" | blastn -db "+db+" -num_threads "+num_threads+" -word_size "+word_size+" -gapopen "+gapopen+" -gapextend "+gapextend+" -penalty "+penalty+" -reward "+reward+" -max_target_seqs "+max_target_seqs+" -evalue "+evalue+" " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt "+outfmt;
+                blastn_cmd = "blastn -db "+db+" -num_threads "+num_threads+" -word_size "+word_size+" -gapopen "+gapopen+" -gapextend "+gapextend+" -penalty "+penalty+" -reward "+reward+" -max_target_seqs "+max_target_seqs+" -evalue "+evalue+" " + ((show_gis == true) ? "-show_gis " : "") + " -outfmt "+outfmt;
 
             System.out.println(blastn_cmd);
 
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", blastn_cmd);
             process = pb.start();
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader hdfsinput = new BufferedReader(new InputStreamReader(hdfsstream));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
             String line;
-            ArrayList<String> out = new ArrayList<String>();
-            while ((line = in.readLine()) != null) {
-                out.add(line);
+            while ((line = hdfsinput.readLine()) != null) {
+                writer.write(line);
             }
+            writer.flush();
 
-            /*
             BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String e;
+            ArrayList<String> out = new ArrayList<String>();
             while ((e = err.readLine()) != null) {
+                System.out.println(e);
                 out.add(e);
             }
-            */
-
             process.waitFor();
-            in.close();
+
             return out.iterator();
         });
 
