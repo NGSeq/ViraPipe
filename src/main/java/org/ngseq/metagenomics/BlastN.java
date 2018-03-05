@@ -93,8 +93,8 @@ public class BlastN {
         for (int i=0;i<st.length;i++){
             if(!st[i].isDirectory()){
                 if(st[i].getLen()>1){
-                    splitFileList.add(st[i].getPath().toString());
-                    System.out.println(st[i].getPath().toString());
+                    splitFileList.add(st[i].getPath().toUri().getRawPath().toString());
+                    System.out.println(st[i].getPath().toUri().getRawPath().toString());
                 }
             }
         }
