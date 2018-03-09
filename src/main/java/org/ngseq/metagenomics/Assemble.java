@@ -5,6 +5,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSClient;
@@ -47,7 +49,6 @@ public class Assemble {
     options.addOption(  new Option( "debug", "saves error log" ) );
     options.addOption(  new Option( "bin", true,"Path to megahit binary, defaults calls 'megahit'" ) );
     options.addOption(  new Option( "single", "Single reads option, default is interleaved paired-end" ) );
-    options.addOption(  new Option( "hdfstmp", "Absolute path to hdfs temp dir for megahit output (YARN must have write permissions if YARN used)" ) );
     options.addOption( splitOpt );
     options.addOption( cOpt );
     options.addOption( kOpt );
@@ -72,15 +73,13 @@ public class Assemble {
     boolean debug = cmd.hasOption("debug");
     String readstype = (cmd.hasOption("single")==true)? "-r":"--12";
     String bin = (cmd.hasOption("bin")==true)? cmd.getOptionValue("bin"):"megahit";
-	String hdfstmp = (cmd.hasOption("hdfstmp")==true)? cmd.getOptionValue("hdfstmp"):"/tmp/megahit/";
 
     int t = (cmd.hasOption("t")==true)? Integer.valueOf(cmd.getOptionValue("t")):1;
     double m = (cmd.hasOption("m")==true)? Double.valueOf(cmd.getOptionValue("m")):0.9;
     boolean mergeout = cmd.hasOption("merge");
 
     FileSystem fs = FileSystem.get(new Configuration());
-    if(!fs.isDirectory(new Path(outDir)))
-      fs.mkdirs(new Path(outDir));
+    fs.mkdirs(fs,new Path(outDir),new FsPermission(FsAction.ALL,FsAction.ALL,FsAction.ALL));
 
     ArrayList<String> splitFileList = new ArrayList<>();
     if(subdirs){
@@ -143,7 +142,7 @@ public class Assemble {
         out.add(e);
       }
 
-      String copy_cmd = System.getenv("HADOOP_HOME")+"/bin/hdfs dfs -put "+localdir+"/"+tempName+" "+hdfstmp+"/megahit_"+fname; //YARN should have write permissions to /tmp in HDFS
+      String copy_cmd = System.getenv("HADOOP_HOME")+"/bin/hdfs dfs -put "+localdir+"/"+tempName+" "+outDir+"/megahit_"+fname; //YARN should have write permissions to /tmp in HDFS
 	ProcessBuilder pb2 = new ProcessBuilder("/bin/sh", "-c", copy_cmd);
       Process process2 = pb2.start();
 
@@ -179,7 +178,7 @@ public class Assemble {
 	
     if(mergeout){
 
-      FileStatus[] dirs = fs.listStatus(new Path(hdfstmp));
+      FileStatus[] dirs = fs.listStatus(new Path(outDir));
       for (FileStatus dir : dirs){
 	if(dir.getPath().getName().toString().startsWith("megahit")){
        	 FileStatus[] st = fs.listStatus(dir.getPath());

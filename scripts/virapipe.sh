@@ -17,14 +17,19 @@ ASSEMBLER_THREADS=10
 NORMALIZATION_KMER_LEN=16
 NORMALIZATION_CUTOFF=15
 TEMP_PATH=${OUTPUT_PATH}/temp  #path to temp directory in HDFS
-LOCAL_TEMP_PATH=/temp #path to temp directory in local filesystem of every node
+LOCAL_TEMP_PATH=/tmp #path to temp directory in local filesystem of every node
 BLAST_TASK=megablast #other option is blastn which is default
 BLAST_DATABASE=/database/blast/nt #path to local fs
 BLAST_HUMAN_DATABASE=/database/blast/hg
 BLAST_PARTITIONS=100 #repartition contigs to this amount (default is same as number of samples)
 BLAST_THREADS=12
-HMM_DB=/database/hmmer
+HMMER_THREADS=12
+HMMER_DB=/database/hmmer/vFam-B_2014.hmm
 HADOOP_LIB_NATIVE=${!HADOOP_HOME}/lib/native/ #include external libraries e.g. libbwajni.so must exist here
+MEGAHIT_BIN=/srv/non_hdfs/megahit/megahit
+BLAST_BIN=/usr/bin/blastn
+HMMER_BIN=hmmsearch
+
 #EX_MEM=${4}
 #NUM_EX=${7}
 #EX_CORES=${8}
@@ -55,4 +60,4 @@ spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllo
 #Blast non human contigs in parallel
 spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.driver.extraJavaOptions="-Djava.library.path=${HADOOP_LIB_NATIVE}" --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 50g --conf spark.yarn.executor.memoryOverhead=10000  --class org.ngseq.metagenomics.BlastN ${CLASSPATH} -in ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -out ${OUTPUT_PATH}/${PROJECT_NAME}_blast_final -num_threads ${BLAST_THREADS} -taxname ${TAXONOMY}
 #HMMSearch viral contigs in parallel
-spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.driver.extraJavaOptions="-Djava.library.path=${HADOOP_LIB_NATIVE}" --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 50g --conf spark.yarn.executor.memoryOverhead=10000  --class org.ngseq.metagenomics.HMMSearch ${CLASSPATH} --inputDir ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman --outputDir ${OUTPUT_PATH}/${PROJECT_NAME}_hmm --tempDir ${LOCAL_TEMP_PATH} --db ${HMM_DB}
+spark-submit --master yarn --deploy-mode ${DEPLOY_MODE} --conf spark.dynamicAllocation.enabled=true --conf spark.driver.extraJavaOptions="-Djava.library.path=${HADOOP_LIB_NATIVE}" --conf spark.dynamicAllocation.cachedExecutorIdleTimeout=100 --conf spark.shuffle.service.enabled=true --conf spark.scheduler.mode=${SCHEDULER_MODE} --conf spark.task.maxFailures=100 --conf spark.yarn.max.executor.failures=100 --executor-memory 50g --conf spark.yarn.executor.memoryOverhead=10000  --class org.ngseq.metagenomics.HMMSearch ${CLASSPATH} -in ${INPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -out ${OUTPUT_PATH}/${PROJECT_NAME}_hmm -localdir ${LOCAL_TEMP_PATH} -db ${HMMER_DB} -t ${HMMER_THREADS} -bin ${HMMER_BIN}
