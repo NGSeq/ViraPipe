@@ -48,7 +48,7 @@ public class BlastNFilter {
         options.addOption(new Option( "show_gis", "" ));
         options.addOption(new Option( "outfmt", true, "" ));
         options.addOption(new Option( "num_threads", true, "" ));
-        options.addOption(new Option( "db", true, "" ));
+        options.addOption(new Option( "db", true, "Path to local Blast human genome database (database must be available on every node under the same path)"));
         options.addOption(new Option( "task", true, "" ));
         options.addOption(new Option( "threshold", true, "" ));
         options.addOption(new Option( "fa", true, "Include only files with extension given " ));
@@ -67,8 +67,8 @@ public class BlastNFilter {
             System.exit(1);
         }
 
-        String input = (cmd.hasOption("in")==true)? cmd.getOptionValue("in"):null;
-        String output = (cmd.hasOption("out")==true)? cmd.getOptionValue("out"):null;
+        String input = cmd.getOptionValue("in");
+        String output = cmd.getOptionValue("out");
         int word_size = (cmd.hasOption("word_size")==true)? Integer.valueOf(cmd.getOptionValue("word_size")):11;
         int gapopen = (cmd.hasOption("gapopen")==true)? Integer.valueOf(cmd.getOptionValue("gapopen")):0;
         int gapextend = (cmd.hasOption("gapextend")==true)? Integer.valueOf(cmd.getOptionValue("gapextend")):2;
@@ -81,7 +81,7 @@ public class BlastNFilter {
         int num_threads = (cmd.hasOption("num_threads")==true)? Integer.valueOf(cmd.getOptionValue("num_threads")):1;
         String bin = (cmd.hasOption("bin")==true)? cmd.getOptionValue("bin"):"blastn";
 
-        String db = (cmd.hasOption("db")==true)? cmd.getOptionValue("db"):"Path to local Blast human genome database (database must be available on every node under the same path)"; //We want to filter out human matches, so use human db as default
+        String db = cmd.getOptionValue("db"); //We want to filter out human matches, so use human db as default
         String task = (cmd.hasOption("task")==true)? cmd.getOptionValue("task"):"blastn";
         int threshold = (cmd.hasOption("threshold")==true)? Integer.valueOf(cmd.getOptionValue("threshold")):0;
         String fastaonly = (cmd.hasOption("fa")==true)? cmd.getOptionValue("fa"):null;
