@@ -64,8 +64,8 @@ public class BlastN {
             System.exit(1);
         }
 
-        String input = (cmd.hasOption("in")==true)? cmd.getOptionValue("in"):null;
-        String output = (cmd.hasOption("out")==true)? cmd.getOptionValue("out"):null;
+        String input = cmd.getOptionValue("in");
+        String output = cmd.getOptionValue("out");
         int word_size = (cmd.hasOption("word_size")==true)? Integer.valueOf(cmd.getOptionValue("word_size")):11;
         int gapopen = (cmd.hasOption("gapopen")==true)? Integer.valueOf(cmd.getOptionValue("gapopen")):0;
         int gapextend = (cmd.hasOption("gapextend")==true)? Integer.valueOf(cmd.getOptionValue("gapextend")):2;
@@ -75,7 +75,7 @@ public class BlastN {
         double evalue = (cmd.hasOption("evalue")==true)? Double.valueOf(cmd.getOptionValue("evalue")):0.001;
         boolean show_gis = cmd.hasOption("show_gis");
         String outfmt = (cmd.hasOption("outfmt")==true)? cmd.getOptionValue("outfmt"): "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore sscinames sskingdoms";
-        String db = (cmd.hasOption("db")==true)? cmd.getOptionValue("db"):null;
+        String db = cmd.getOptionValue("db");
         String task = (cmd.hasOption("task")==true)? cmd.getOptionValue("task"):"blastn";
         int num_threads = (cmd.hasOption("num_threads")==true)? Integer.valueOf(cmd.getOptionValue("num_threads")):1;
         String taxname = (cmd.hasOption("taxname")==true)? cmd.getOptionValue("taxname"):"";
