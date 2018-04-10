@@ -62,10 +62,7 @@ public class FastaFilter {
                 return new Tuple2<String, String>( split[0], split[1]);
             }
             else return new Tuple2<String, String>("","");
-        }).filter(fasta -> {
-            System.out.println(fasta);
-            return !ids.contains(fasta._1.toString()) && !fasta._1.isEmpty();
-        });
+        }).filter(fasta -> !ids.contains(fasta._1.toString()) && !fasta._1.isEmpty());
 
         fastaRDD.map(z-> ">"+z._1+"\n"+z._2()).saveAsTextFile(output);
         sc.stop();
