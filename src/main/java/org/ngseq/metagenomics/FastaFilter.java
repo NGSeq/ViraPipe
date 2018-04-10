@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ Filter
  Usage:
 
  spark-submit --master local[${NUM_EXECUTORS}] --executor-memory 10g --class org.ngseq.metagenomics.FastaFilter virapipe-0.9-jar-with-dependencies.jar -fasta ${OUTPUT_PATH}/${PROJECT_NAME}_blast_nonhuman -blast ${OUTPUT_PATH}/${PROJECT_NAME}_blast_final -out ${OUTPUT_PATH}/${PROJECT_NAME}_nonhuman_unknown
@@ -23,8 +24,8 @@ public class FastaFilter {
 
         Options options = new Options();
         options.addOption(new Option( "out", true, "" ));
-        options.addOption(new Option( "fasta", true, "" ));
-        options.addOption(new Option( "blast", true, "" ));
+        options.addOption(new Option( "fasta", true, "Path to fasta sequences" ));
+        options.addOption(new Option( "filter", true, "Blast format supported (one record per line, first column must be the corresponding sequence ID, columns delimited by tab)" ));
 
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp( "spark-submit <spark specific args>", options, true );
@@ -40,7 +41,7 @@ public class FastaFilter {
         }
 
         String input = (cmd.hasOption("fasta")==true)? cmd.getOptionValue("fasta"):null;
-        String input2 = (cmd.hasOption("blast")==true)? cmd.getOptionValue("blast"):null;
+        String input2 = (cmd.hasOption("filter")==true)? cmd.getOptionValue("filter"):null;
         String output = (cmd.hasOption("out")==true)? cmd.getOptionValue("out"):null;
 
         SparkConf conf = new SparkConf().setAppName("FastaFilter");
