@@ -117,14 +117,17 @@ public class BlastN {
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", blastn_cmd);
             process = pb.start();
 
-            BufferedReader hdfsinput = new BufferedReader(new InputStreamReader(hdfsstream));
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-            String line;
-            while ((line = hdfsinput.readLine()) != null) {
-                writer.write(line);
-                writer.newLine();
-            }
-            writer.close();
+            Thread processInputWriter = new Thread(() -> {
+                try (BufferedReader hdfsinput = new BufferedReader(new InputStreamReader(hdfsstream));
+                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
+                    String line;
+                    while ((line = hdfsinput.readLine()) != null) {
+                        writer.write(line);
+                        writer.newLine();
+                    }
+                }
+            });
+            processInputWriter.start();
 
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String bline;
